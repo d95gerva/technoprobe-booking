@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechnoProbe — Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #185FA5; --blue-light: #E6F1FB; --blue-mid: #378ADD; --blue-dark: #0C447C;
+  --teal: #0F6E56; --teal-light: #E1F5EE; --teal-mid: #1D9E75;
+  --amber: #854F0B; --amber-light: #FAEEDA; --amber-mid: #EF9F27;
+  --red: #A32D2D; --red-light: #FCEBEB; --red-mid: #E24B4A;
+  --green: #3B6D11; --green-light: #EAF3DE; --green-mid: #639922;
+  --gray: #5F5E5A; --gray-light: #F1EFE8; --gray-dark: #2C2C2A;
+  --bg: #F8F7F4; --surface: #FFFFFF; --border: rgba(0,0,0,0.1);
+  --text: #1a1a18; --text-muted: #5F5E5A;
+  --radius: 10px; --radius-lg: 14px;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+/* ── LOGIN SCREEN ── */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #0C447C 0%, #185FA5 50%, #1D9E75 100%);
+}
+.login-card {
+  background: white; border-radius: 20px; padding: 48px 40px; max-width: 420px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;
+}
+.login-logo { width: 60px; height: 60px; background: var(--blue-light); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.login-logo svg { width: 32px; height: 32px; }
+.login-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+.login-card p { color: var(--text-muted); margin-bottom: 32px; font-size: 14px; }
+.ms-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 14px; border: 1.5px solid #e0e0e0; border-radius: var(--radius);
+  background: white; cursor: pointer; font-family: var(--font); font-size: 15px; font-weight: 500;
+  transition: all 0.2s; color: var(--text);
+}
+.ms-btn:hover { background: #f8f8f8; border-color: #185FA5; }
+.ms-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+.login-note { font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+
+/* ── MAIN APP ── */
+#app { display: none; min-height: 100vh; flex-direction: column; }
+
+/* ── HEADER ── */
+header {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 60px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo { font-weight: 600; font-size: 16px; color: var(--blue-dark); letter-spacing: -0.3px; }
+.logo span { color: var(--teal-mid); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.user-pill {
+  display: flex; align-items: center; gap: 8px; background: var(--gray-light);
+  padding: 6px 12px; border-radius: 20px; font-size: 13px;
+}
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--blue-mid); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.btn-logout { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 13px; font-family: var(--font); padding: 6px 10px; border-radius: 6px; }
+.btn-logout:hover { background: var(--gray-light); }
+
+/* ── TABS ── */
+.tabs { background: white; border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 4px; }
+.tab {
+  padding: 14px 18px; border: none; background: none; cursor: pointer; font-family: var(--font);
+  font-size: 14px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: all 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-icon { margin-right: 6px; }
+
+/* ── MAIN CONTENT ── */
+main { flex: 1; padding: 28px 24px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+/* ── SECTION HEADER ── */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.section-title { font-size: 20px; font-weight: 600; }
+.btn-primary {
+  background: var(--blue); color: white; border: none; padding: 10px 18px;
+  border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 14px;
+  font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-secondary {
+  background: white; color: var(--text); border: 1px solid var(--border); padding: 8px 16px;
+  border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 13px;
+  font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+}
+.btn-secondary:hover { background: var(--gray-light); }
+
+/* ── SEDE GRID ── */
+.sede-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.sede-card {
+  background: white; border-radius: var(--radius-lg); border: 1.5px solid var(--border);
+  overflow: hidden; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+}
+.sede-card:hover { border-color: var(--blue-mid); box-shadow: 0 4px 12px rgba(24,95,165,0.1); transform: translateY(-1px); }
+.sede-card.selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,95,165,0.12); }
+.sede-map { height: 130px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.sede-map img { width: 100%; height: 100%; object-fit: cover; }
+.sede-map-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--blue); opacity: 0.7; }
+.sede-map-placeholder svg { width: 36px; height: 36px; }
+.sede-info { padding: 14px 16px; }
+.sede-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.sede-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; font-family: var(--mono);
+}
+.badge-blue { background: var(--blue-light); color: var(--blue-dark); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-gray { background: var(--gray-light); color: var(--gray); }
+
+/* ── DATE BAR ── */
+.date-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.date-bar input[type=date] {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font); font-size: 14px; background: white; cursor: pointer;
+}
+.date-shortcuts { display: flex; gap: 6px; }
+.date-shortcut {
+  padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: white; cursor: pointer; font-family: var(--font); font-size: 13px;
+  transition: all 0.2s;
+}
+.date-shortcut:hover, .date-shortcut.active { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue-dark); }
+
+/* ── SCRIVANIA GRID ── */
+.scrivania-section { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow); }
+.scrivania-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.scrivania-grid { display: grid; gap: 10px; }
+.scrivania-btn {
+  background: white; border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 14px 12px; cursor: pointer; transition: all 0.2s; text-align: left; font-family: var(--font);
+  display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden;
+}
+.scrivania-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--border); transition: background 0.2s; }
+.scrivania-btn.available { border-color: #d0e8c0; }
+.scrivania-btn.available::before { background: var(--green-mid); }
+.scrivania-btn.available:hover { border-color: var(--green-mid); background: var(--green-light); transform: translateY(-1px); }
+.scrivania-btn.occupied { border-color: #f0c5c5; background: #fdf5f5; cursor: not-allowed; opacity: 0.7; }
+.scrivania-btn.occupied::before { background: var(--red-mid); }
+.scrivania-btn.mine { border-color: var(--blue-mid); background: var(--blue-light); }
+.scrivania-btn.mine::before { background: var(--blue-mid); }
+.scrivania-num { font-size: 18px; font-weight: 700; font-family: var(--mono); color: var(--text); padding-left: 8px; }
+.scrivania-who { font-size: 11px; color: var(--text-muted); padding-left: 8px; }
+
+/* ── MAP SECTION ── */
+.map-upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gray-light);
+}
+.map-upload-zone:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+.map-preview { width: 100%; border-radius: var(--radius); max-height: 280px; object-fit: contain; }
+
+/* ── AUTO SECTION ── */
+.auto-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.auto-card {
+  background: white; border-radius: var(--radius-lg); border: 1.5px solid var(--border);
+  padding: 20px 16px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+  text-align: center;
+}
+.auto-card:hover { border-color: var(--teal-mid); box-shadow: 0 4px 12px rgba(15,110,86,0.1); transform: translateY(-1px); }
+.auto-card.occupied { opacity: 0.55; cursor: not-allowed; }
+.auto-card.mine { border-color: var(--blue-mid); background: var(--blue-light); }
+.auto-icon { font-size: 36px; margin-bottom: 10px; }
+.auto-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.auto-targa { font-family: var(--mono); font-size: 12px; color: var(--text-muted); background: var(--gray-light); padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+.auto-status { font-size: 12px; font-weight: 600; }
+.auto-status.free { color: var(--green); }
+.auto-status.busy { color: var(--red); }
+.auto-status.pending { color: var(--amber); }
+
+/* ── MY BOOKINGS TABLE ── */
+.bookings-table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+.bookings-table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); background: var(--gray-light); border-bottom: 1px solid var(--border); }
+.bookings-table td { padding: 13px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; }
+.bookings-table tr:last-child td { border-bottom: none; }
+.bookings-table tr:hover td { background: rgba(0,0,0,0.015); }
+.action-btn { background: none; border: none; cursor: pointer; color: var(--red); font-size: 12px; font-family: var(--font); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--red-light); }
+.action-btn:hover { background: var(--red-light); }
+
+/* ── EXPORT SECTION ── */
+.export-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; }
+.export-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); }
+.export-card:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+.export-icon { font-size: 30px; margin-bottom: 8px; }
+.export-label { font-weight: 600; font-size: 14px; }
+.export-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 500;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 480px;
+  padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  transform: translateY(10px); transition: transform 0.2s;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.modal-body { display: flex; flex-direction: column; gap: 16px; }
+.field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font); font-size: 14px; background: white; outline: none;
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue-mid); }
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+.btn-cancel { background: white; border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 14px; }
+.btn-confirm { background: var(--blue); color: white; border: none; padding: 10px 22px; border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 14px; font-weight: 500; }
+.btn-confirm:hover { background: var(--blue-dark); }
+.info-row { display: flex; gap: 10px; background: var(--blue-light); border-radius: var(--radius); padding: 12px; font-size: 13px; align-items: flex-start; }
+.info-row svg { width: 16px; height: 16px; color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+
+/* ── TOAST ── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--gray-dark); color: white; padding: 12px 18px; border-radius: var(--radius);
+  font-size: 13px; max-width: 340px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transform: translateX(120%); transition: transform 0.3s ease; display: flex; align-items: center; gap: 8px;
+}
+.toast.in { transform: translateX(0); }
+.toast.success { background: var(--teal); }
+.toast.warning { background: var(--amber); color: var(--amber-light); }
+.toast.error { background: var(--red); }
+
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 16px; box-shadow: var(--shadow); }
+.stat-value { font-size: 26px; font-weight: 700; font-family: var(--mono); color: var(--text); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+/* ── UPLOAD ── */
+.upload-section { margin-top: 12px; }
+.upload-label { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
+.upload-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── PENDING APPROVALS ── */
+.approval-card { background: white; border: 1.5px solid var(--amber-mid); border-radius: var(--radius-lg); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); gap: 12px; }
+.approval-info { flex: 1; }
+.approval-title { font-weight: 600; font-size: 14px; }
+.approval-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.approval-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-approve { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 12px; font-weight: 600; }
+.btn-reject { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-size: 12px; font-weight: 600; }
+
+/* empty state */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state svg { width: 48px; height: 48px; margin: 0 auto 12px; display: block; opacity: 0.3; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; background: var(--gray-light); border-radius: 20px; font-size: 12px; color: var(--text-muted); }
+
+@media (max-width: 600px) {
+  main { padding: 16px 12px; }
+  .sede-grid { grid-template-columns: 1fr; }
+  .auto-grid { grid-template-columns: 1fr 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#185FA5"/><path d="M8 16h16M16 8v16" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </div>
+    <h1>TechnoProbe Booking</h1>
+    <p>Prenota scrivanie e veicoli aziendali</p>
+    <button class="ms-btn" onclick="doLogin()">
+      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+      Accedi con Microsoft 365
+    </button>
+    <p class="login-note">SSO aziendale • Autenticazione sicura Microsoft Entra ID</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none; flex-direction: column; min-height: 100vh;">
+  <header>
+    <div class="header-left">
+      <div style="width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><path d="M8 16h16M16 8v16" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </div>
+      <span class="logo">TechnoProbe <span>Booking</span></span>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="avatar" id="avatar-initials">JD</div>
+        <span id="user-name">John Doe</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Esci</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('scrivanie', this)">🖥️ Scrivanie</button>
+    <button class="tab" onclick="switchTab('auto', this)">🚗 Veicoli</button>
+    <button class="tab" onclick="switchTab('mie', this)">📋 Le mie prenotazioni</button>
+    <button class="tab" onclick="switchTab('export', this)">📊 Esporta dati</button>
+    <button class="tab" id="tab-admin-btn" style="display:none;margin-left:auto;color:var(--amber);" onclick="switchTab('admin', this)">⚙️ Admin</button>
+  </div>
+
+  <main>
+    <!-- SCRIVANIE TAB -->
+    <div id="tab-scrivanie">
+      <div class="stats-row" id="stats-scrivanie"></div>
+      <div class="section-header">
+        <div class="section-title">Seleziona sede e data</div>
+      </div>
+      <div class="date-bar">
+        <input type="date" id="desk-date" onchange="refreshDesks()">
+        <div class="date-shortcuts">
+          <button class="date-shortcut" onclick="setDateShortcut(0, this)">Oggi</button>
+          <button class="date-shortcut" onclick="setDateShortcut(1, this)">Domani</button>
+          <button class="date-shortcut" onclick="setDateShortcut(7, this)">+7 giorni</button>
+        </div>
+      </div>
+      <div class="sede-grid" id="sede-grid"></div>
+      <div id="desk-panel" style="display:none;"></div>
+    </div>
+
+    <!-- AUTO TAB -->
+    <div id="tab-auto" style="display:none;">
+      <div class="section-header">
+        <div class="section-title">Veicoli aziendali</div>
+        <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--amber-mid);display:inline-block;"></span>
+          Le prenotazioni richiedono approvazione
+        </div>
+      </div>
+      <div class="date-bar">
+        <label style="font-size:13px; color:var(--text-muted);">Data ritiro</label>
+        <input type="date" id="car-date-from" onchange="refreshCars()">
+        <label style="font-size:13px; color:var(--text-muted);">Data restituzione</label>
+        <input type="date" id="car-date-to" onchange="refreshCars()">
+      </div>
+      <div class="auto-grid" id="auto-grid"></div>
+
+      <div id="pending-approvals-section" style="margin-top:28px; display:none;">
+        <hr>
+        <div class="section-header" style="margin-bottom:14px;">
+          <div class="section-title" style="font-size:16px;">⏳ Approvazioni in attesa</div>
+          <div class="chip">Solo per Davide Gervasoni</div>
+        </div>
+        <div id="pending-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- MIE PRENOTAZIONI TAB -->
+    <div id="tab-mie" style="display:none;">
+      <div class="section-header">
+        <div class="section-title">Le mie prenotazioni</div>
+        <button class="btn-secondary" onclick="exportCSV()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Esporta CSV
+        </button>
+      </div>
+      <table class="bookings-table" id="my-bookings-table">
+        <thead>
+          <tr>
+            <th>Tipo</th><th>Risorsa</th><th>Sede</th><th>Data inizio</th><th>Data fine</th><th>Stato</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="my-bookings-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ADMIN TAB -->
+    <div id="tab-admin" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <div style="background:var(--amber-light);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">⚙️</span>
+          <div>
+            <div style="font-weight:600;font-size:14px;color:var(--amber);">Pannello Amministratore</div>
+            <div style="font-size:12px;color:var(--text-muted);">Solo per utenti admin autorizzati</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEZIONI ADMIN -->
+      <div style="display:grid;gap:20px;">
+
+        <!-- GESTIONE SEDI -->
+        <div style="background:white;border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);">
+          <div class="section-header" style="margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;">🏢 Gestione Sedi</div>
+            <button class="btn-primary" onclick="openModal('modal-add-sede')">+ Aggiungi sede</button>
+          </div>
+          <table class="bookings-table" id="admin-sedi-table">
+            <thead><tr><th>Sede</th><th>Codice</th><th>Scrivanie</th><th>Prenotazioni oggi</th><th>Mappa</th><th></th></tr></thead>
+            <tbody id="admin-sedi-body"></tbody>
+          </table>
+        </div>
+
+        <!-- GESTIONE VEICOLI -->
+        <div style="background:white;border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);">
+          <div class="section-header" style="margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;">🚗 Gestione Veicoli</div>
+            <button class="btn-primary" onclick="openModal('modal-add-car')">+ Aggiungi veicolo</button>
+          </div>
+          <table class="bookings-table" id="admin-cars-table">
+            <thead><tr><th>Veicolo</th><th>Targa</th><th>Stato oggi</th><th></th></tr></thead>
+            <tbody id="admin-cars-body"></tbody>
+          </table>
+        </div>
+
+        <!-- GESTIONE ADMIN -->
+        <div style="background:white;border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);">
+          <div class="section-header" style="margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;">👤 Utenti Admin</div>
+            <button class="btn-primary" onclick="openModal('modal-add-admin')">+ Aggiungi admin</button>
+          </div>
+          <div id="admin-users-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- TUTTE LE PRENOTAZIONI -->
+        <div style="background:white;border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);">
+          <div class="section-header" style="margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;">📋 Tutte le prenotazioni</div>
+            <div style="display:flex;gap:8px;">
+              <select id="admin-filter-type" onchange="renderAdminBookings()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:13px;">
+                <option value="">Tutti i tipi</option>
+                <option value="desk">Scrivanie</option>
+                <option value="car">Veicoli</option>
+              </select>
+              <select id="admin-filter-status" onchange="renderAdminBookings()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:13px;">
+                <option value="">Tutti gli stati</option>
+                <option value="confirmed">Confermata</option>
+                <option value="pending">In attesa</option>
+                <option value="rejected">Rifiutata</option>
+              </select>
+              <button class="btn-secondary" onclick="exportCSV()">📄 CSV</button>
+            </div>
+          </div>
+          <table class="bookings-table">
+            <thead><tr><th>Tipo</th><th>Risorsa</th><th>Utente</th><th>Data</th><th>Stato</th><th></th></tr></thead>
+            <tbody id="admin-bookings-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EXPORT TAB -->
+    <div id="tab-export" style="display:none;">
+      <div class="section-title" style="margin-bottom:6px;">Esportazione dati</div>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Esporta tutte le prenotazioni nei formati più comuni.</p>
+      <div class="export-cards">
+        <div class="export-card" onclick="exportCSV()">
+          <div class="export-icon">📄</div>
+          <div class="export-label">CSV</div>
+          <div class="export-sub">Excel / Google Sheets</div>
+        </div>
+        <div class="export-card" onclick="exportJSON()">
+          <div class="export-icon">🔧</div>
+          <div class="export-label">JSON</div>
+          <div class="export-sub">Integrazione API / BI</div>
+        </div>
+        <div class="export-card" onclick="exportICS()">
+          <div class="export-icon">📅</div>
+          <div class="export-label">ICS (Calendario)</div>
+          <div class="export-sub">Outlook / Google Cal</div>
+        </div>
+        <div class="export-card" onclick="printReport()">
+          <div class="export-icon">🖨️</div>
+          <div class="export-label">Report PDF</div>
+          <div class="export-sub">Stampa / archiviazione</div>
+        </div>
+      </div>
+      <hr>
+      <div id="export-preview" style="margin-top:4px;"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL SCRIVANIA -->
+<div class="modal-overlay" id="modal-desk">
+  <div class="modal">
+    <div class="modal-title" id="modal-desk-title">Prenota scrivania</div>
+    <div class="modal-sub" id="modal-desk-sub">Dettagli prenotazione</div>
+    <div class="modal-body">
+      <div class="info-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>Riceverai una <strong>mail di conferma</strong> all'indirizzo aziendale.</div>
+      </div>
+      <div class="field">
+        <label>Note (opzionale)</label>
+        <textarea id="desk-note" rows="3" placeholder="Es. postazione vicino alla finestra..."></textarea>
+      </div>
+      <div class="field">
+        <label>Email di conferma</label>
+        <input type="email" id="desk-confirm-email" readonly>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-desk')">Annulla</button>
+      <button class="btn-confirm" onclick="confirmDeskBooking()">✓ Conferma prenotazione</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AUTO -->
+<div class="modal-overlay" id="modal-car">
+  <div class="modal">
+    <div class="modal-title" id="modal-car-title">Richiesta veicolo</div>
+    <div class="modal-sub">La prenotazione richiede approvazione di Davide Gervasoni</div>
+    <div class="modal-body">
+      <div class="info-row" style="background:var(--amber-light);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--amber);"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>Verrà inviata una mail di <strong>richiesta approvazione</strong> a davide.gervasoni@technoprobe.com</div>
+      </div>
+      <div class="field">
+        <label>Motivo utilizzo *</label>
+        <textarea id="car-reason" rows="3" placeholder="Es. visita cliente a Milano, trasferta Torino..."></textarea>
+      </div>
+      <div class="field">
+        <label>Destinazione</label>
+        <input type="text" id="car-dest" placeholder="Es. Milano, Via Bocconi 8">
+      </div>
+      <div class="field">
+        <label>Email di conferma</label>
+        <input type="email" id="car-confirm-email" readonly>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-car')">Annulla</button>
+      <button class="btn-confirm" style="background:var(--teal);" onclick="confirmCarBooking()">📩 Invia richiesta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGGIUNGI SEDE -->
+<div class="modal-overlay" id="modal-add-sede">
+  <div class="modal">
+    <div class="modal-title">🏢 Aggiungi / Modifica sede</div>
+    <div class="modal-sub" id="modal-sede-sub">Nuova sede</div>
+    <input type="hidden" id="edit-sede-id">
+    <div class="modal-body">
+      <div class="field"><label>Nome sede *</label><input type="text" id="sede-nome" placeholder="Es. Monza"></div>
+      <div class="field"><label>Codice (3 lettere) *</label><input type="text" id="sede-codice" placeholder="Es. MON" maxlength="3" style="text-transform:uppercase;"></div>
+      <div class="field"><label>Numero scrivanie *</label><input type="number" id="sede-scrivanie" min="1" max="100" value="5"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-add-sede')">Annulla</button>
+      <button class="btn-confirm" onclick="saveSede()">Salva sede</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGGIUNGI VEICOLO -->
+<div class="modal-overlay" id="modal-add-car">
+  <div class="modal">
+    <div class="modal-title">🚗 Aggiungi / Modifica veicolo</div>
+    <input type="hidden" id="edit-car-id">
+    <div class="modal-body">
+      <div class="field"><label>Nome veicolo *</label><input type="text" id="car-nome" placeholder="Es. Golf"></div>
+      <div class="field"><label>Targa *</label><input type="text" id="car-targa" placeholder="Es. AB123CD" style="text-transform:uppercase;"></div>
+      <div class="field">
+        <label>Emoji</label>
+        <select id="car-emoji">
+          <option value="🚗">🚗 Auto</option><option value="🚙">🚙 SUV</option>
+          <option value="🚐">🚐 Van</option><option value="🚌">🚌 Bus</option><option value="🏎️">🏎️ Sport</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-add-car')">Annulla</button>
+      <button class="btn-confirm" onclick="saveCar()">Salva veicolo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGGIUNGI ADMIN -->
+<div class="modal-overlay" id="modal-add-admin">
+  <div class="modal">
+    <div class="modal-title">👤 Aggiungi utente admin</div>
+    <div class="modal-body">
+      <div class="field"><label>Nome completo *</label><input type="text" id="admin-nome" placeholder="Es. Anna Ferrari"></div>
+      <div class="field"><label>Email aziendale *</label><input type="email" id="admin-email" placeholder="Es. anna.ferrari@technoprobe.com"></div>
+      <div class="info-row" style="background:var(--amber-light);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--amber);width:16px;height:16px;flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <div style="font-size:12px;">L'utente avrà accesso completo al pannello admin, inclusa gestione sedi e veicoli.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-add-admin')">Annulla</button>
+      <button class="btn-confirm" onclick="saveAdmin()">Aggiungi admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MODIFICA SCRIVANIE -->
+<div class="modal-overlay" id="modal-edit-desks">
+  <div class="modal">
+    <div class="modal-title" id="modal-edit-desks-title">Modifica scrivanie</div>
+    <input type="hidden" id="edit-desks-sede-id">
+    <div class="modal-body">
+      <div class="field">
+        <label>Numero di scrivanie</label>
+        <input type="number" id="edit-desks-count" min="1" max="200" value="10">
+      </div>
+      <div class="info-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div style="font-size:12px;">Ridurre il numero elimina solo le scrivanie non prenotate.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-edit-desks')">Annulla</button>
+      <button class="btn-confirm" onclick="saveDesksCount()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+let SEDI = JSON.parse(localStorage.getItem('tp_sedi') || 'null') || [
+  { id: 'agrate',    name: 'Agrate Brianza',  scrivanie: 3,  color: 'blue',  code: 'AGR' },
+  { id: 'osnago',    name: 'Osnago',           scrivanie: 8,  color: 'teal',  code: 'OSN' },
+  { id: 'cernusco',  name: 'Cernusco S/N',     scrivanie: 10, color: 'amber', code: 'CER' },
+  { id: 'vimercate', name: 'Vimercate',        scrivanie: 10, color: 'blue',  code: 'VIM' },
+];
+
+let VEICOLI = JSON.parse(localStorage.getItem('tp_veicoli') || 'null') || [
+  { id: 'tipo',   name: 'Fiat Tipo',   targa: 'EK123AB', emoji: '🚗' },
+  { id: 'tcross', name: 'T-Cross',     targa: 'GH456CD', emoji: '🚙' },
+  { id: 'tiguan', name: 'Tiguan',      targa: 'MN789EF', emoji: '🚐' },
+  { id: 'troc',   name: 'T-Roc',      targa: 'PQ012GH', emoji: '🚗' },
+];
+
+let ADMINS = JSON.parse(localStorage.getItem('tp_admins') || 'null') || [
+  { email: 'davide.gervasoni@technoprobe.com', name: 'Davide Gervasoni' },
+];
+
+function saveSEDI() { localStorage.setItem('tp_sedi', JSON.stringify(SEDI)); }
+function saveVEICOLI() { localStorage.setItem('tp_veicoli', JSON.stringify(VEICOLI)); }
+function saveADMINS() { localStorage.setItem('tp_admins', JSON.stringify(ADMINS)); }
+function isAdmin(email) { return ADMINS.some(a => a.email === email); }
+
+// In-memory storage
+let bookings = JSON.parse(localStorage.getItem('tp_bookings') || '[]');
+let sediMaps = JSON.parse(localStorage.getItem('tp_maps') || '{}');
+let currentUser = null;
+let pendingCar = null;
+let pendingDesk = null;
+
+function saveBookings() { localStorage.setItem('tp_bookings', JSON.stringify(bookings)); }
+function saveMaps() { localStorage.setItem('tp_maps', JSON.stringify(sediMaps)); }
+
+// Seed some demo bookings
+function seedDemoData() {
+  if (bookings.length > 0) return;
+  const today = todayStr();
+  const tomorrow = offsetDate(1);
+  bookings = [
+    { id: genId(), type: 'desk', sede: 'agrate',    desk: 1, date: today,    dateEnd: today,    user: 'mario.rossi@technoprobe.com',  name: 'Mario Rossi',  status: 'confirmed' },
+    { id: genId(), type: 'desk', sede: 'cernusco',  desk: 3, date: today,    dateEnd: today,    user: 'giulia.bianchi@technoprobe.com', name: 'Giulia Bianchi', status: 'confirmed' },
+    { id: genId(), type: 'car',  car: 'tiguan',     date: today, dateEnd: tomorrow, user: 'luca.verdi@technoprobe.com', name: 'Luca Verdi', status: 'pending', reason: 'Visita cliente Milano', dest: 'Milano' },
+  ];
+  saveBookings();
+}
+
+// ─────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────
+const DEMO_USERS = [
+  { email: 'davide.gervasoni@technoprobe.com', name: 'Davide Gervasoni', isAdmin: true },
+  { email: 'mario.rossi@technoprobe.com', name: 'Mario Rossi' },
+  { email: 'giulia.bianchi@technoprobe.com', name: 'Giulia Bianchi' },
+];
+
+function doLogin() {
+  // Simulate M365 SSO popup
+  const emails = DEMO_USERS.map(u => u.email);
+  const choice = prompt(
+    '🔐 Microsoft 365 SSO (Demo)\n\nSeleziona account:\n' +
+    emails.map((e,i) => `${i+1}. ${e}`).join('\n') + '\n\nInserisci 1, 2 o 3:'
+  );
+  const idx = parseInt(choice) - 1;
+  if (idx < 0 || idx >= DEMO_USERS.length) { alert('Accesso annullato.'); return; }
+  currentUser = { ...DEMO_USERS[idx], isAdmin: isAdmin(DEMO_USERS[idx].email) };
+  seedDemoData();
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('user-name').textContent = currentUser.name;
+  document.getElementById('avatar-initials').textContent = currentUser.name.split(' ').map(n=>n[0]).join('').toUpperCase();
+  document.getElementById('desk-confirm-email').value = currentUser.email;
+  document.getElementById('car-confirm-email').value = currentUser.email;
+  // Show admin tab only for admins
+  document.getElementById('tab-admin-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
+  if (currentUser.isAdmin) {
+    document.getElementById('avatar-initials').style.background = '#854F0B';
+  }
+  initDates();
+  renderScrivanie();
+  renderStats();
+  renderMyBookings();
+  toast('✅ Benvenuto ' + currentUser.name + (currentUser.isAdmin ? ' 🔑 (Admin)' : '') + '!', 'success');
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function offsetDate(days) {
+  const d = new Date(); d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+function genId() { return Math.random().toString(36).substr(2,9); }
+function fmtDate(s) { if (!s) return '—'; const d = new Date(s+'T00:00:00'); return d.toLocaleDateString('it-IT', {day:'2-digit',month:'short',year:'numeric'}); }
+
+function initDates() {
+  const t = todayStr();
+  document.getElementById('desk-date').value = t;
+  document.getElementById('car-date-from').value = t;
+  document.getElementById('car-date-to').value = offsetDate(1);
+  setActiveDateShortcut(0);
+}
+
+function setActiveDateShortcut(idx) {
+  document.querySelectorAll('.date-shortcut').forEach((b,i) => b.classList.toggle('active', i===idx));
+}
+
+function setDateShortcut(days, btn) {
+  document.getElementById('desk-date').value = offsetDate(days);
+  document.querySelectorAll('.date-shortcut').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshDesks();
+}
+
+// ─────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['scrivanie','auto','mie','export','admin'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab === 'auto') { renderAuto(); renderPendingApprovals(); }
+  if (tab === 'mie') renderMyBookings();
+  if (tab === 'export') renderExportPreview();
+  if (tab === 'admin') renderAdminPanel();
+}
+
+// ─────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────
+function renderStats() {
+  const today = todayStr();
+  const mine = bookings.filter(b => b.user === currentUser.email);
+  const todayAll = bookings.filter(b => b.date === today && b.type === 'desk');
+  const totalDesks = SEDI.reduce((a,s) => a+s.scrivanie, 0);
+  document.getElementById('stats-scrivanie').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${totalDesks}</div><div class="stat-label">Scrivanie totali</div></div>
+    <div class="stat-card"><div class="stat-value">${todayAll.length}</div><div class="stat-label">Prenotate oggi</div></div>
+    <div class="stat-card"><div class="stat-value">${mine.length}</div><div class="stat-label">Mie prenotazioni</div></div>
+    <div class="stat-card"><div class="stat-value">${VEICOLI.length}</div><div class="stat-label">Veicoli disponibili</div></div>
+  `;
+}
+
+// ─────────────────────────────────────────
+// SCRIVANIE
+// ─────────────────────────────────────────
+let selectedSede = null;
+
+function renderScrivanie() {
+  const grid = document.getElementById('sede-grid');
+  grid.innerHTML = SEDI.map(s => {
+    const map = sediMaps[s.id];
+    const mapHtml = map
+      ? `<img src="${map}" class="map-preview" style="height:130px;" alt="Mappa ${s.name}">`
+      : `<div class="sede-map-placeholder">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+           <span style="font-size:11px;">Mappa non caricata</span>
+           <button onclick="event.stopPropagation();uploadMap('${s.id}')" style="font-size:11px;background:var(--blue-light);color:var(--blue);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;margin-top:4px;">Carica mappa</button>
+         </div>`;
+    const booked = getBookedDesks(s.id, document.getElementById('desk-date').value);
+    const free = s.scrivanie - booked.length;
+    const pct = Math.round((booked.length / s.scrivanie) * 100);
+    return `
+    <div class="sede-card ${selectedSede===s.id?'selected':''}" onclick="selectSede('${s.id}')">
+      <div class="sede-map">${mapHtml}</div>
+      <div class="sede-info">
+        <div class="sede-name">${s.name}</div>
+        <div class="sede-meta">
+          <span class="badge badge-${s.color === 'blue' ? 'blue' : s.color === 'teal' ? 'green' : s.color === 'amber' ? 'amber' : 'blue'}">${s.code}</span>
+          <span>${s.scrivanie} scrivanie</span>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+            <span style="color:var(--text-muted);">Occupazione oggi</span>
+            <span style="font-weight:600;color:${pct>75?'var(--red)':pct>40?'var(--amber)':'var(--green)'};">${pct}%</span>
+          </div>
+          <div style="height:4px;background:var(--gray-light);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${pct>75?'var(--red-mid)':pct>40?'var(--amber-mid)':'var(--green-mid)'};border-radius:2px;transition:width 0.5s;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px;">
+            <span style="color:var(--green);">✓ ${free} libere</span>
+            <span style="color:var(--text-muted);">${booked.length} occupate</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getBookedDesks(sedeId, date) {
+  return bookings.filter(b => b.type==='desk' && b.sede===sedeId && b.date===date);
+}
+
+function selectSede(sedeId) {
+  selectedSede = sedeId;
+  renderScrivanie();
+  renderDeskPanel();
+  document.getElementById('desk-panel').style.display = 'block';
+  document.getElementById('desk-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function refreshDesks() {
+  renderScrivanie();
+  if (selectedSede) renderDeskPanel();
+}
+
+function renderDeskPanel() {
+  const sede = SEDI.find(s => s.id === selectedSede);
+  const date = document.getElementById('desk-date').value;
+  const booked = getBookedDesks(selectedSede, date);
+  const map = sediMaps[selectedSede];
+
+  let deskButtons = '';
+  for (let i = 1; i <= sede.scrivanie; i++) {
+    const booking = booked.find(b => b.desk === i);
+    const isMe = booking && booking.user === currentUser.email;
+    const isOcc = !!booking && !isMe;
+    const cls = isMe ? 'mine' : isOcc ? 'occupied' : 'available';
+    const who = isMe ? 'Tu' : isOcc ? booking.name.split(' ')[0] : 'Libera';
+    const clickable = !isOcc;
+    deskButtons += `
+      <button class="scrivania-btn ${cls}" ${clickable ? `onclick="openDeskModal(${i}, '${selectedSede}', '${date}')"` : 'disabled'} style="pointer-events:${isOcc?'none':'auto'}">
+        <div class="scrivania-num">${String(i).padStart(2,'0')}</div>
+        <div class="scrivania-who">${who}</div>
+      </button>`;
+  }
+
+  const cols = sede.scrivanie <= 4 ? sede.scrivanie : sede.scrivanie <= 8 ? 4 : 5;
+
+  document.getElementById('desk-panel').innerHTML = `
+    <div class="scrivania-section" style="margin-top:0;">
+      <h3>
+        🖥️ Scrivanie — ${sede.name}
+        <span class="chip">${fmtDate(date)}</span>
+        <button onclick="uploadMap('${sede.id}')" style="margin-left:auto;font-size:11px;background:var(--gray-light);border:1px solid var(--border);padding:4px 10px;border-radius:6px;cursor:pointer;">🗺️ ${map?'Aggiorna':'Carica'} mappa</button>
+      </h3>
+      ${map ? `<img src="${map}" class="map-preview" style="margin-bottom:16px;max-height:200px;" alt="Mappa ${sede.name}">` : ''}
+      <div class="scrivania-grid" style="grid-template-columns:repeat(${cols}, 1fr);">
+        ${deskButtons}
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;">
+        <span>🟢 Libera</span><span>🔵 Mia</span><span>🔴 Occupata</span>
+      </div>
+    </div>
+  `;
+}
+
+function uploadMap(sedeId) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      sediMaps[sedeId] = ev.target.result;
+      saveMaps();
+      renderScrivanie();
+      if (selectedSede === sedeId) renderDeskPanel();
+      toast('🗺️ Mappa caricata con successo!', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function openDeskModal(deskNum, sedeId, date) {
+  const sede = SEDI.find(s => s.id === sedeId);
+  const existingMine = bookings.find(b => b.type==='desk' && b.sede===sedeId && b.desk===deskNum && b.date===date && b.user===currentUser.email);
+  if (existingMine) {
+    if (confirm('Hai già questa scrivania prenotata. Vuoi cancellare la prenotazione?')) {
+      bookings = bookings.filter(b => b.id !== existingMine.id);
+      saveBookings(); renderDeskPanel(); renderScrivanie(); renderStats();
+      toast('Prenotazione cancellata.', 'warning');
+    }
+    return;
+  }
+  pendingDesk = { deskNum, sedeId, date };
+  document.getElementById('modal-desk-title').textContent = `Prenota Scrivania ${String(deskNum).padStart(2,'0')}`;
+  document.getElementById('modal-desk-sub').textContent = `${sede.name} — ${fmtDate(date)}`;
+  document.getElementById('desk-note').value = '';
+  openModal('modal-desk');
+}
+
+function confirmDeskBooking() {
+  if (!pendingDesk) return;
+  const { deskNum, sedeId, date } = pendingDesk;
+  const booking = {
+    id: genId(), type: 'desk', sede: sedeId, desk: deskNum,
+    date, dateEnd: date,
+    user: currentUser.email, name: currentUser.name,
+    note: document.getElementById('desk-note').value,
+    status: 'confirmed', createdAt: new Date().toISOString()
+  };
+  bookings.push(booking);
+  saveBookings();
+  closeModal('modal-desk');
+  renderDeskPanel(); renderScrivanie(); renderStats();
+  simulateSendEmail(currentUser.email, 'Conferma prenotazione scrivania',
+    `La tua prenotazione è confermata:\n\nSede: ${SEDI.find(s=>s.id===sedeId).name}\nScrivania: ${String(deskNum).padStart(2,'0')}\nData: ${fmtDate(date)}`);
+  toast('✅ Scrivania prenotata! Mail di conferma inviata.', 'success');
+  pendingDesk = null;
+}
+
+// ─────────────────────────────────────────
+// AUTO
+// ─────────────────────────────────────────
+function getCarStatus(carId) {
+  const from = document.getElementById('car-date-from').value;
+  const to = document.getElementById('car-date-to').value;
+  const b = bookings.find(b => b.type==='car' && b.car===carId && b.status !== 'rejected' && !(b.dateEnd < from || b.date > to));
+  if (!b) return { status: 'free', booking: null };
+  if (b.user === currentUser.email) return { status: 'mine', booking: b };
+  return { status: b.status === 'pending' ? 'pending' : 'busy', booking: b };
+}
+
+function renderAuto() {
+  const grid = document.getElementById('auto-grid');
+  grid.innerHTML = VEICOLI.map(v => {
+    const { status, booking } = getCarStatus(v.id);
+    const labels = { free: '✓ Disponibile', busy: '✗ Non disponibile', mine: '★ Mia prenotazione', pending: '⏳ In approvazione' };
+    const colors = { free: 'free', busy: 'busy', mine: 'free', pending: 'pending' };
+    return `
+    <div class="auto-card ${status==='busy'?'occupied':status==='mine'?'mine':''}" onclick="${status==='busy'?'':'openCarModal(\''+v.id+'\')'}">
+      <div class="auto-icon">${v.emoji}</div>
+      <div class="auto-name">${v.name}</div>
+      <div class="auto-targa">${v.targa}</div>
+      <div class="auto-status ${colors[status]||''}">${labels[status]||''}</div>
+      ${booking && status!=='mine' ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${booking.name?.split(' ')[0]||''}</div>` : ''}
+      ${status==='mine' ? `<button onclick="event.stopPropagation();cancelCarBooking('${booking.id}')" class="action-btn" style="margin-top:8px;">Cancella</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function refreshCars() { renderAuto(); }
+
+function openCarModal(carId) {
+  const car = VEICOLI.find(v => v.id === carId);
+  pendingCar = { carId };
+  document.getElementById('modal-car-title').textContent = `Richiesta — ${car.name}`;
+  document.getElementById('car-reason').value = '';
+  document.getElementById('car-dest').value = '';
+  openModal('modal-car');
+}
+
+function confirmCarBooking() {
+  if (!pendingCar) return;
+  const reason = document.getElementById('car-reason').value.trim();
+  if (!reason) { toast('⚠️ Inserisci il motivo dell\'utilizzo.', 'warning'); return; }
+  const from = document.getElementById('car-date-from').value;
+  const to = document.getElementById('car-date-to').value;
+  const booking = {
+    id: genId(), type: 'car', car: pendingCar.carId,
+    date: from, dateEnd: to,
+    user: currentUser.email, name: currentUser.name,
+    reason, dest: document.getElementById('car-dest').value,
+    status: 'pending', createdAt: new Date().toISOString()
+  };
+  bookings.push(booking);
+  saveBookings();
+  closeModal('modal-car');
+  renderAuto();
+  // Simulate emails
+  simulateSendEmail('davide.gervasoni@technoprobe.com', 'Richiesta approvazione veicolo',
+    `${currentUser.name} ha richiesto:\n\nVeicolo: ${VEICOLI.find(v=>v.id===pendingCar.carId).name}\nDate: ${fmtDate(from)} – ${fmtDate(to)}\nMotivo: ${reason}\n\nClicca per approvare o rifiutare.`);
+  simulateSendEmail(currentUser.email, 'Richiesta veicolo inviata',
+    `La tua richiesta è stata inviata a Davide Gervasoni per l'approvazione.`);
+  toast('📩 Richiesta inviata! In attesa di approvazione.', 'success');
+  renderPendingApprovals();
+  pendingCar = null;
+}
+
+function cancelCarBooking(bookingId) {
+  if (!confirm('Cancellare questa prenotazione?')) return;
+  bookings = bookings.filter(b => b.id !== bookingId);
+  saveBookings(); renderAuto(); renderPendingApprovals();
+  toast('Prenotazione cancellata.', 'warning');
+}
+
+function renderPendingApprovals() {
+  const pending = bookings.filter(b => b.type==='car' && b.status==='pending');
+  const section = document.getElementById('pending-approvals-section');
+  const list = document.getElementById('pending-list');
+  const isDavide = currentUser.email === 'davide.gervasoni@technoprobe.com';
+  section.style.display = (isDavide && pending.length > 0) ? 'block' : 'none';
+  if (!isDavide) return;
+  list.innerHTML = pending.map(b => {
+    const car = VEICOLI.find(v => v.id === b.car);
+    return `
+    <div class="approval-card">
+      <div class="approval-info">
+        <div class="approval-title">${car?.name} — ${b.name}</div>
+        <div class="approval-sub">${fmtDate(b.date)} → ${fmtDate(b.dateEnd)} • ${b.dest||'N/D'}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${b.reason}</div>
+      </div>
+      <div class="approval-actions">
+        <button class="btn-approve" onclick="approveCarBooking('${b.id}')">✓ Approva</button>
+        <button class="btn-reject" onclick="rejectCarBooking('${b.id}')">✗ Rifiuta</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function approveCarBooking(id) {
+  const b = bookings.find(b => b.id === id);
+  if (!b) return;
+  b.status = 'confirmed';
+  saveBookings(); renderAuto(); renderPendingApprovals();
+  simulateSendEmail(b.user, 'Veicolo approvato ✅', `La tua richiesta per ${VEICOLI.find(v=>v.id===b.car)?.name} è stata approvata da Davide Gervasoni.`);
+  toast('✅ Prenotazione approvata, mail inviata all\'utente.', 'success');
+}
+
+function rejectCarBooking(id) {
+  const b = bookings.find(b => b.id === id);
+  if (!b) return;
+  b.status = 'rejected';
+  saveBookings(); renderAuto(); renderPendingApprovals();
+  simulateSendEmail(b.user, 'Richiesta veicolo rifiutata', `La tua richiesta per ${VEICOLI.find(v=>v.id===b.car)?.name} è stata rifiutata.`);
+  toast('Prenotazione rifiutata, mail inviata all\'utente.', 'warning');
+}
+
+// ─────────────────────────────────────────
+// MY BOOKINGS
+// ─────────────────────────────────────────
+function renderMyBookings() {
+  const mine = bookings.filter(b => b.user === currentUser.email).sort((a,b) => b.createdAt > a.createdAt ? 1 : -1);
+  const statusBadge = { confirmed: '<span class="badge badge-green">Confermata</span>', pending: '<span class="badge badge-amber">In attesa</span>', rejected: '<span class="badge badge-red">Rifiutata</span>' };
+  const body = document.getElementById('my-bookings-body');
+  if (mine.length === 0) {
+    body.innerHTML = `<tr><td colspan="7" class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Nessuna prenotazione</td></tr>`;
+    return;
+  }
+  body.innerHTML = mine.map(b => {
+    const type = b.type === 'desk'
+      ? `🖥️ Scrivania`
+      : `🚗 Veicolo`;
+    const res = b.type === 'desk'
+      ? `Scrivania ${String(b.desk).padStart(2,'0')}`
+      : VEICOLI.find(v=>v.id===b.car)?.name || b.car;
+    const sede = b.type === 'desk' ? (SEDI.find(s=>s.id===b.sede)?.name||b.sede) : '—';
+    return `<tr>
+      <td>${type}</td><td>${res}</td><td>${sede}</td>
+      <td>${fmtDate(b.date)}</td><td>${fmtDate(b.dateEnd)}</td>
+      <td>${statusBadge[b.status]||b.status}</td>
+      <td><button class="action-btn" onclick="cancelBooking('${b.id}')">Cancella</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function cancelBooking(id) {
+  if (!confirm('Cancellare questa prenotazione?')) return;
+  bookings = bookings.filter(b => b.id !== id);
+  saveBookings(); renderMyBookings(); renderScrivanie(); renderStats();
+  if (selectedSede) renderDeskPanel();
+  renderAuto();
+  toast('Prenotazione cancellata.', 'warning');
+}
+
+// ─────────────────────────────────────────
+// EMAIL SIMULATION
+// ─────────────────────────────────────────
+function simulateSendEmail(to, subject, body) {
+  console.log(`📧 EMAIL → ${to}\nOggetto: ${subject}\n${body}`);
+  // In produzione: Microsoft Graph API POST /v1.0/me/sendMail
+  // oppure Power Automate Flow su trigger HTTP
+}
+
+// ─────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────
+function exportCSV() {
+  const rows = [['ID','Tipo','Risorsa','Sede','Data inizio','Data fine','Utente','Nome','Stato','Note/Motivo']];
+  bookings.forEach(b => {
+    rows.push([
+      b.id, b.type,
+      b.type==='desk' ? `Scrivania ${b.desk}` : (VEICOLI.find(v=>v.id===b.car)?.name||b.car),
+      b.type==='desk' ? (SEDI.find(s=>s.id===b.sede)?.name||b.sede) : '—',
+      b.date, b.dateEnd||b.date,
+      b.user, b.name, b.status,
+      b.note || b.reason || ''
+    ]);
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadFile('prenotazioni_technoprobe.csv', 'text/csv', csv);
+  toast('📄 CSV esportato!', 'success');
+}
+
+function exportJSON() {
+  const json = JSON.stringify(bookings, null, 2);
+  downloadFile('prenotazioni_technoprobe.json', 'application/json', json);
+  toast('🔧 JSON esportato!', 'success');
+}
+
+function exportICS() {
+  let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//TechnoProbe Booking//IT\n';
+  bookings.filter(b => b.user === currentUser.email && b.status === 'confirmed').forEach(b => {
+    const dt = b.date.replace(/-/g,'');
+    const dtEnd = (b.dateEnd || b.date).replace(/-/g,'');
+    const title = b.type==='desk'
+      ? `Scrivania ${b.desk} — ${SEDI.find(s=>s.id===b.sede)?.name}`
+      : `Veicolo: ${VEICOLI.find(v=>v.id===b.car)?.name}`;
+    ics += `BEGIN:VEVENT\nUID:${b.id}@technoprobe.booking\nDTSTART;VALUE=DATE:${dt}\nDTEND;VALUE=DATE:${dtEnd}\nSUMMARY:${title}\nEND:VEVENT\n`;
+  });
+  ics += 'END:VCALENDAR';
+  downloadFile('prenotazioni_technoprobe.ics', 'text/calendar', ics);
+  toast('📅 Calendario ICS esportato!', 'success');
+}
+
+function printReport() {
+  window.print();
+}
+
+function downloadFile(filename, mime, content) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 500);
+}
+
+function renderExportPreview() {
+  const total = bookings.length;
+  const confirmed = bookings.filter(b=>b.status==='confirmed').length;
+  const pending = bookings.filter(b=>b.status==='pending').length;
+  document.getElementById('export-preview').innerHTML = `
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Tot. prenotazioni</div></div>
+      <div class="stat-card"><div class="stat-value">${confirmed}</div><div class="stat-label">Confermate</div></div>
+      <div class="stat-card"><div class="stat-value">${pending}</div><div class="stat-label">In attesa</div></div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────
+// ADMIN PANEL
+// ─────────────────────────────────────────
+function renderAdminPanel() {
+  if (!currentUser?.isAdmin) return;
+  renderAdminSedi();
+  renderAdminCars();
+  renderAdminUsers();
+  renderAdminBookings();
+}
+
+function renderAdminSedi() {
+  const today = todayStr();
+  document.getElementById('admin-sedi-body').innerHTML = SEDI.map(s => {
+    const todayBooked = bookings.filter(b => b.type==='desk' && b.sede===s.id && b.date===today).length;
+    const map = sediMaps[s.id];
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge badge-blue">${s.code}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:var(--mono);font-weight:600;">${s.scrivanie}</span>
+          <button onclick="openEditDesks('${s.id}')" style="font-size:11px;background:var(--blue-light);color:var(--blue);border:none;padding:3px 8px;border-radius:5px;cursor:pointer;">modifica</button>
+        </div>
+      </td>
+      <td><span style="font-weight:600;color:${todayBooked>0?'var(--amber)':'var(--green)'};">${todayBooked} / ${s.scrivanie}</span></td>
+      <td>
+        ${map
+          ? `<span style="color:var(--green);font-size:12px;">✓ Caricata</span>
+             <button onclick="uploadMap('${s.id}')" style="font-size:11px;background:var(--gray-light);border:none;padding:3px 8px;border-radius:5px;cursor:pointer;margin-left:4px;">aggiorna</button>`
+          : `<button onclick="uploadMap('${s.id}')" style="font-size:11px;background:var(--amber-light);color:var(--amber);border:none;padding:3px 8px;border-radius:5px;cursor:pointer;">📷 Carica</button>`}
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button onclick="editSede('${s.id}')" style="font-size:11px;background:var(--blue-light);color:var(--blue);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">✏️ Modifica</button>
+          <button onclick="deleteSede('${s.id}')" style="font-size:11px;background:var(--red-light);color:var(--red);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAdminCars() {
+  const today = todayStr();
+  document.getElementById('admin-cars-body').innerHTML = VEICOLI.map(v => {
+    const b = bookings.find(b => b.type==='car' && b.car===v.id && b.date <= today && (b.dateEnd||b.date) >= today && b.status !== 'rejected');
+    const status = b ? (b.status === 'pending' ? '⏳ In attesa' : `🔴 ${b.name?.split(' ')[0]}`) : '🟢 Disponibile';
+    return `<tr>
+      <td><span style="font-size:18px;margin-right:6px;">${v.emoji}</span><strong>${v.name}</strong></td>
+      <td><span style="font-family:var(--mono);background:var(--gray-light);padding:2px 8px;border-radius:4px;font-size:12px;">${v.targa}</span></td>
+      <td style="font-size:13px;">${status}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button onclick="editCar('${v.id}')" style="font-size:11px;background:var(--blue-light);color:var(--blue);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">✏️ Modifica</button>
+          <button onclick="deleteCar('${v.id}')" style="font-size:11px;background:var(--red-light);color:var(--red);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAdminUsers() {
+  document.getElementById('admin-users-list').innerHTML = ADMINS.map(a => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-light);border-radius:var(--radius);gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="avatar" style="width:32px;height:32px;font-size:13px;background:var(--amber-mid);">${a.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px;">${a.name}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${a.email}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="badge badge-amber">Admin</span>
+        ${a.email !== currentUser.email
+          ? `<button onclick="removeAdmin('${a.email}')" style="font-size:11px;background:var(--red-light);color:var(--red);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">Rimuovi</button>`
+          : `<span style="font-size:11px;color:var(--text-muted);">(tu)</span>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAdminBookings() {
+  const typeFilter = document.getElementById('admin-filter-type')?.value || '';
+  const statusFilter = document.getElementById('admin-filter-status')?.value || '';
+  const statusBadge = { confirmed: '<span class="badge badge-green">Confermata</span>', pending: '<span class="badge badge-amber">In attesa</span>', rejected: '<span class="badge badge-red">Rifiutata</span>' };
+  const filtered = bookings
+    .filter(b => (!typeFilter || b.type === typeFilter) && (!statusFilter || b.status === statusFilter))
+    .sort((a,b) => b.createdAt > a.createdAt ? 1 : -1);
+  document.getElementById('admin-bookings-body').innerHTML = filtered.length === 0
+    ? `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Nessuna prenotazione trovata</td></tr>`
+    : filtered.map(b => {
+        const res = b.type==='desk' ? `🖥️ Scrivania ${String(b.desk).padStart(2,'0')}` : `🚗 ${VEICOLI.find(v=>v.id===b.car)?.name||b.car}`;
+        const sede = b.type==='desk' ? (SEDI.find(s=>s.id===b.sede)?.name||b.sede) : '—';
+        return `<tr>
+          <td style="font-size:12px;color:var(--text-muted);">${sede}</td>
+          <td>${res}</td>
+          <td style="font-size:12px;">${b.name}<br><span style="color:var(--text-muted);">${b.user}</span></td>
+          <td style="font-size:12px;">${fmtDate(b.date)}${b.dateEnd&&b.dateEnd!==b.date?' → '+fmtDate(b.dateEnd):''}</td>
+          <td>${statusBadge[b.status]||b.status}</td>
+          <td><button class="action-btn" onclick="adminDeleteBooking('${b.id}')">Elimina</button></td>
+        </tr>`;
+      }).join('');
+}
+
+// SEDE CRUD
+function openEditDesks(sedeId) {
+  const s = SEDI.find(s=>s.id===sedeId);
+  document.getElementById('edit-desks-sede-id').value = sedeId;
+  document.getElementById('modal-edit-desks-title').textContent = `Scrivanie — ${s.name}`;
+  document.getElementById('edit-desks-count').value = s.scrivanie;
+  openModal('modal-edit-desks');
+}
+function saveDesksCount() {
+  const sedeId = document.getElementById('edit-desks-sede-id').value;
+  const count = parseInt(document.getElementById('edit-desks-count').value);
+  if (!count || count < 1) { toast('⚠️ Numero non valido.', 'warning'); return; }
+  const s = SEDI.find(s=>s.id===sedeId);
+  s.scrivanie = count;
+  saveSEDI();
+  closeModal('modal-edit-desks');
+  renderAdminSedi(); renderScrivanie(); renderStats();
+  if (selectedSede === sedeId) renderDeskPanel();
+  toast(`✅ ${s.name}: ${count} scrivanie aggiornate.`, 'success');
+}
+function editSede(sedeId) {
+  const s = SEDI.find(s=>s.id===sedeId);
+  document.getElementById('edit-sede-id').value = sedeId;
+  document.getElementById('modal-sede-sub').textContent = `Modifica: ${s.name}`;
+  document.getElementById('sede-nome').value = s.name;
+  document.getElementById('sede-codice').value = s.code;
+  document.getElementById('sede-scrivanie').value = s.scrivanie;
+  openModal('modal-add-sede');
+}
+function saveSede() {
+  const nome = document.getElementById('sede-nome').value.trim();
+  const codice = document.getElementById('sede-codice').value.trim().toUpperCase();
+  const scrivanie = parseInt(document.getElementById('sede-scrivanie').value);
+  if (!nome || !codice || !scrivanie) { toast('⚠️ Compila tutti i campi.', 'warning'); return; }
+  const editId = document.getElementById('edit-sede-id').value;
+  if (editId) {
+    const s = SEDI.find(s=>s.id===editId);
+    s.name = nome; s.code = codice; s.scrivanie = scrivanie;
+  } else {
+    SEDI.push({ id: genId(), name: nome, scrivanie, color: 'blue', code: codice });
+  }
+  saveSEDI();
+  document.getElementById('edit-sede-id').value = '';
+  document.getElementById('modal-sede-sub').textContent = 'Nuova sede';
+  closeModal('modal-add-sede');
+  renderAdminSedi(); renderScrivanie(); renderStats();
+  toast(`✅ Sede "${nome}" salvata.`, 'success');
+}
+function deleteSede(sedeId) {
+  const s = SEDI.find(s=>s.id===sedeId);
+  if (!confirm(`Eliminare la sede "${s.name}"? Tutte le prenotazioni future verranno cancellate.`)) return;
+  bookings = bookings.filter(b => !(b.type==='desk' && b.sede===sedeId));
+  const idx = SEDI.findIndex(s=>s.id===sedeId);
+  SEDI.splice(idx,1);
+  saveSEDI(); saveBookings();
+  if (selectedSede === sedeId) { selectedSede = null; document.getElementById('desk-panel').style.display='none'; }
+  renderAdminSedi(); renderScrivanie(); renderStats();
+  toast(`🗑️ Sede eliminata.`, 'warning');
+}
+
+// VEICOLO CRUD
+function editCar(carId) {
+  const v = VEICOLI.find(v=>v.id===carId);
+  document.getElementById('edit-car-id').value = carId;
+  document.getElementById('car-nome').value = v.name;
+  document.getElementById('car-targa').value = v.targa;
+  document.getElementById('car-emoji').value = v.emoji;
+  openModal('modal-add-car');
+}
+function saveCar() {
+  const nome = document.getElementById('car-nome').value.trim();
+  const targa = document.getElementById('car-targa').value.trim().toUpperCase();
+  const emoji = document.getElementById('car-emoji').value;
+  if (!nome || !targa) { toast('⚠️ Compila tutti i campi.', 'warning'); return; }
+  const editId = document.getElementById('edit-car-id').value;
+  if (editId) {
+    const v = VEICOLI.find(v=>v.id===editId);
+    v.name = nome; v.targa = targa; v.emoji = emoji;
+  } else {
+    VEICOLI.push({ id: genId(), name: nome, targa, emoji });
+  }
+  saveVEICOLI();
+  document.getElementById('edit-car-id').value = '';
+  closeModal('modal-add-car');
+  renderAdminCars();
+  toast(`✅ Veicolo "${nome}" salvato.`, 'success');
+}
+function deleteCar(carId) {
+  const v = VEICOLI.find(v=>v.id===carId);
+  if (!confirm(`Eliminare "${v.name}"?`)) return;
+  const idx = VEICOLI.findIndex(v=>v.id===carId);
+  VEICOLI.splice(idx,1);
+  saveVEICOLI();
+  renderAdminCars();
+  toast(`🗑️ Veicolo eliminato.`, 'warning');
+}
+
+// ADMIN USERS
+function saveAdmin() {
+  const nome = document.getElementById('admin-nome').value.trim();
+  const email = document.getElementById('admin-email').value.trim().toLowerCase();
+  if (!nome || !email) { toast('⚠️ Compila tutti i campi.', 'warning'); return; }
+  if (ADMINS.some(a=>a.email===email)) { toast('⚠️ Utente già admin.', 'warning'); return; }
+  ADMINS.push({ email, name: nome });
+  saveADMINS();
+  closeModal('modal-add-admin');
+  document.getElementById('admin-nome').value = '';
+  document.getElementById('admin-email').value = '';
+  renderAdminUsers();
+  toast(`✅ ${nome} aggiunto come admin.`, 'success');
+}
+function removeAdmin(email) {
+  if (!confirm(`Rimuovere i diritti admin per ${email}?`)) return;
+  const idx = ADMINS.findIndex(a=>a.email===email);
+  ADMINS.splice(idx,1);
+  saveADMINS();
+  renderAdminUsers();
+  toast('Admin rimosso.', 'warning');
+}
+
+function adminDeleteBooking(id) {
+  if (!confirm('Eliminare questa prenotazione?')) return;
+  bookings = bookings.filter(b => b.id !== id);
+  saveBookings(); renderAdminBookings(); renderAdminSedi(); renderStats();
+  toast('Prenotazione eliminata.', 'warning');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ─────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.classList.add('in'), 10);
+  setTimeout(() => {
+    el.classList.remove('in');
+    setTimeout(() => el.remove(), 350);
+  }, 3800);
+}
+</script>
+</body>
+</html>
